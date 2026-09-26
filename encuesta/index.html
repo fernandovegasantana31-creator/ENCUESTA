@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encuesta 3°E — Hábitos y energía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F3F4; --card:#FFFFFF; --ink:#202124; --ink-soft:#5F6368;
+  --accent:#1A73E8; --accent-dark:#174EA6; --error:#D93025; --border:#DADCE0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#131314; --card:#1E1F20; --ink:#E8EAED; --ink-soft:#9AA0A6; --border:#3C4043; }
+}
+:root[data-theme="dark"]{ --bg:#131314; --card:#1E1F20; --ink:#E8EAED; --ink-soft:#9AA0A6; --border:#3C4043; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Roboto',Arial,sans-serif; line-height:1.5; }
+.wrap{ max-width:640px; margin:0 auto; padding:24px 16px 72px; }
+.progress-track{ position:sticky; top:env(safe-area-inset-top,0px); height:4px; background:var(--border); border-radius:0; overflow:hidden; margin-bottom:20px; z-index:5; }
+.progress-fill{ height:100%; width:0%; background:var(--accent); transition:width .25s ease; }
+.card{ background:var(--card); border:1px solid var(--border); border-radius:8px; box-shadow:0 1px 2px 0 rgba(60,64,67,.15); margin:0 0 16px; overflow:hidden; }
+.header-card{ border-top:10px solid var(--accent); padding:24px 24px 20px; }
+h1{ font-weight:500; font-size:1.65rem; margin:0 0 10px; letter-spacing:0; }
+.sub{ color:var(--ink); font-size:.95rem; margin:0 0 14px; }
+.meta{ color:var(--ink-soft); font-size:.85rem; margin:14px 0 0; padding-top:14px; border-top:1px solid var(--border); }
+.q-card{ padding:22px 24px; }
+.q-title{ font-weight:500; font-size:.98rem; margin:0 0 14px; }
+.req{ color:var(--error); margin-left:2px; }
+.opt{ display:flex; align-items:center; gap:12px; padding:9px 6px; border-radius:6px; cursor:pointer; }
+.opt:hover{ background:rgba(26,115,232,.06); }
+.opt input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
+.opt input:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.opt span{ font-size:.93rem; }
+button{ font-family:'Roboto',Arial,sans-serif; font-size:.92rem; border-radius:4px; cursor:pointer; }
+.form-actions{ display:flex; align-items:center; justify-content:space-between; padding:20px 4px 8px; }
+.btn-primary{ background:var(--accent); color:#fff; border:none; padding:10px 26px; font-weight:500; }
+.btn-primary:hover{ background:var(--accent-dark); }
+.btn-primary:disabled{ opacity:.5; cursor:not-allowed; }
+.btn-text{ background:transparent; color:var(--accent); border:none; padding:10px 12px; font-weight:500; }
+.btn-text:hover{ background:rgba(26,115,232,.08); }
+.btn-ghost{ background:transparent; color:var(--ink); border:1px solid var(--border); padding:8px 14px; }
+.msg{ font-size:.86rem; color:var(--error); min-height:1.2em; padding:0 4px; }
+.confirm{ display:none; }
+.confirm.show{ display:block; }
+.confirm .card{ text-align:center; padding:40px 24px; border-top:10px solid var(--accent); }
+.confirm h2{ font-weight:500; font-size:1.25rem; margin:16px 0 6px; }
+.admin{ margin-top:34px; padding-top:6px; }
+.admin-label{ font-size:.78rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; margin:0 0 10px 4px; }
+.actions-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.tally{ font-size:.87rem; color:var(--ink-soft); padding:16px; margin-top:10px; display:none; }
+.tally.show{ display:block; }
+.tally p{ margin:0 0 10px; }
+.tally strong{ color:var(--ink); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="card header-card">
+    <h1>Hábitos y energía en clase</h1>
+    <p class="sub">Encuesta para alumnos de 3° "E" — Esc. Sec. 0122, Jilotepec.</p>
+    <p class="meta">Marca la opción que más se acerque a tu situación. No hay respuestas correctas ni incorrectas, y tus respuestas son anónimas.</p>
+  </div>
+
+  <form id="surveyForm"></form>
+  <p class="msg" id="formMsg"></p>
+  <div class="form-actions">
+    <button class="btn-primary" id="submitBtn" type="button">Enviar</button>
+    <button class="btn-text" id="clearBtn" type="button">Borrar formulario</button>
+  </div>
+
+  <div class="confirm" id="confirmBox">
+    <div class="card">
+      <div style="font-size:1.8rem;">✅</div>
+      <h2>Se registró tu respuesta</h2>
+      <p class="sub" style="color:var(--ink-soft)">Gracias por participar. Puedes cerrar esta ventana.</p>
+      <button class="btn-ghost" id="againBtn" type="button">Enviar otra respuesta</button>
+    </div>
+  </div>
+
+  <div class="admin">
+    <p class="admin-label">Panel del profesor</p>
+    <div class="card">
+      <div class="actions-row" style="padding:16px;">
+        <button class="btn-ghost" id="toggleResults" type="button">Ver respuestas guardadas en este dispositivo</button>
+        <button class="btn-ghost" id="exportBtn" type="button">Descargar CSV</button>
+      </div>
+      <div class="tally" id="tallyBox"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+ {id:'q1', text:'¿Cuántas horas duermes aproximadamente cada noche?', options:['Menos de 6 horas','De 6 a 7 horas','De 7 a 8 horas','Más de 8 horas']},
+ {id:'q2', text:'¿A qué hora te duermes normalmente entre semana?', options:['Antes de las 9 pm','Entre 9 y 10 pm','Entre 10 y 11 pm','Después de las 11 pm']},
+ {id:'q3', text:'¿Cuántas horas al día usas el celular o videojuegos?', options:['Menos de 1 hora','De 1 a 2 horas','De 2 a 4 horas','Más de 4 horas']},
+ {id:'q4', text:'¿A qué hora usas más tu celular?', options:['En la mañana','En la tarde','En la noche','Todo el día']},
+ {id:'q5', text:'¿Cuántas veces al día comes frutas o verduras?', options:['Nunca','1 vez al día','2 veces al día','3 o más veces']},
+ {id:'q6', text:'¿Cuántas veces a la semana comes comida chatarra o dulces?', options:['Nunca','1 a 2 veces','3 a 4 veces','Casi todos los días']},
+ {id:'q7', text:'¿Cuántos vasos de agua tomas al día?', options:['Ninguno','1 a 2 vasos','3 a 4 vasos','5 o más vasos']},
+ {id:'q8', text:'¿Cuántas veces a la semana haces actividad física (deporte, correr, bailar)?', options:['Nunca','1 a 2 veces','3 a 4 veces','Todos o casi todos los días']},
+ {id:'q9', text:'¿Cómo te sientes generalmente durante las clases después del recreo?', options:['Con energía','Cansado(a)','Con sueño','Sin ganas de trabajar']},
+ {id:'q10', text:'¿Cuál crees que es la principal razón por la que te sientes así después del recreo?', options:['Dormí poco','Comí mucho o mal','Usé mucho el celular o videojuegos','No sé bien']}
+];
+const LOCAL_KEY = 'encuesta3e_respuestas';
+
+const form = document.getElementById('surveyForm');
+QUESTIONS.forEach((q, i) => {
+  const card = document.createElement('div');
+  card.className = 'card q-card';
+  const title = document.createElement('p');
+  title.className = 'q-title';
+  title.innerHTML = (i+1) + '. ' + q.text + '<span class="req">*</span>';
+  card.appendChild(title);
+  q.options.forEach((opt) => {
+    const label = document.createElement('label');
+    label.className = 'opt';
+    label.innerHTML = '<input type="radio" name="' + q.id + '" value="' + opt.replace(/"/g,'&quot;') + '"><span></span>';
+    label.querySelector('span').textContent = opt;
+    card.appendChild(label);
+  });
+  form.appendChild(card);
+});
+
+function updateProgress(){
+  const answered = QUESTIONS.filter(q => form.querySelector('input[name="'+q.id+'"]:checked')).length;
+  document.getElementById('progressFill').style.width = (answered / QUESTIONS.length * 100) + '%';
+}
+form.addEventListener('change', updateProgress);
+
+async function saveResponse(data){
+  try{
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    arr.push(data);
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(arr));
+  }catch(e){}
+}
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('formMsg');
+  const data = { timestamp: new Date().toISOString() };
+  for(const q of QUESTIONS){
+    const checked = form.querySelector('input[name="'+q.id+'"]:checked');
+    if(!checked){
+      msg.textContent = 'Falta responder la pregunta ' + (QUESTIONS.indexOf(q)+1) + '.';
+      form.querySelector('.q-card:nth-of-type(' + (QUESTIONS.indexOf(q)+1) + ')').scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+    data[q.id] = checked.value;
+  }
+  msg.textContent = '';
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+  await saveResponse(data);
+  btn.disabled = false; btn.textContent = 'Enviar';
+  form.style.display = 'none';
+  document.querySelector('.form-actions').style.display = 'none';
+  document.getElementById('confirmBox').classList.add('show');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  form.reset();
+  updateProgress();
+  document.getElementById('formMsg').textContent = '';
+});
+
+document.getElementById('againBtn').addEventListener('click', () => {
+  form.reset();
+  updateProgress();
+  form.style.display = '';
+  document.querySelector('.form-actions').style.display = '';
+  document.getElementById('confirmBox').classList.remove('show');
+});
+
+function renderTally(){
+  const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+  const box = document.getElementById('tallyBox');
+  if(!arr.length){ box.innerHTML = '<p>Aún no hay respuestas guardadas en este dispositivo.</p>'; return; }
+  let html = '<p><strong>' + arr.length + '</strong> respuesta(s) guardadas aquí.</p>';
+  QUESTIONS.forEach(q => {
+    const counts = {};
+    q.options.forEach(o => counts[o] = 0);
+    arr.forEach(r => { if(r[q.id] in counts) counts[r[q.id]]++; });
+    html += '<p><strong>' + q.text + '</strong><br>' +
+      q.options.map(o => o + ': ' + counts[o]).join(' · ') + '</p>';
+  });
+  box.innerHTML = html;
+}
+document.getElementById('toggleResults').addEventListener('click', (e) => {
+  const box = document.getElementById('tallyBox');
+  box.classList.toggle('show');
+  if(box.classList.contains('show')){
+    renderTally();
+    e.target.textContent = 'Ocultar respuestas guardadas';
+  } else {
+    e.target.textContent = 'Ver respuestas guardadas en este dispositivo';
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  try{
+    const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    if(!arr.length){ alert('Aún no hay respuestas guardadas en este dispositivo.'); return; }
+    const headers = ['timestamp', ...QUESTIONS.map(q => q.id)];
+    const rows = [headers.join(',')].concat(arr.map(r => headers.map(h => '"' + String(r[h] ?? '').replace(/"/g,'""') + '"').join(',')));
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'respuestas_encuesta_3e.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){ alert('No se pudo generar el archivo.'); }
+});
+
+updateProgress();
+</script>
+</body>
+</html>
